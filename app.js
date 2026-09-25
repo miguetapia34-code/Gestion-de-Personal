@@ -83,7 +83,7 @@ function iniciarAplicacion() {
   const usuario = obtenerUsuario();
 
   if (!usuario) {
-    window.location.href = "./index.html";
+    window.location.href = "index.html";
     return;
   }
 
@@ -104,7 +104,7 @@ logoutButton.addEventListener("click", () => {
     CONFIG.USER_SESSION_KEY
   );
 
-  window.location.href = "./index.html";
+  window.location.href = "index.html";
 });
 
 iniciarAplicacion();
