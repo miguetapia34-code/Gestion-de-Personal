@@ -1,4 +1,4 @@
-import { CONFIG } from "./config.js";
+import { CONFIG } from "config.js";
 
 const form = document.querySelector("#loginForm");
 const message = document.querySelector("#loginMessage");
