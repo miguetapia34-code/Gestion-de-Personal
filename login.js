@@ -1,10 +1,12 @@
-import { CONFIG } from "config.js";
+import { CONFIG } from "./config.js";
 
 const form = document.querySelector("#loginForm");
 const message = document.querySelector("#loginMessage");
 const button = document.querySelector("#loginButton");
 const passwordInput = document.querySelector("#password");
 const togglePassword = document.querySelector("#togglePassword");
+
+console.log("login.js cargado correctamente");
 
 togglePassword.addEventListener("click", () => {
   if (passwordInput.type === "password") {
@@ -16,7 +18,7 @@ togglePassword.addEventListener("click", () => {
   }
 });
 
-form.addEventListener("submit", async event => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   message.textContent = "";
@@ -28,34 +30,51 @@ form.addEventListener("submit", async event => {
   const password = form.password.value;
 
   if (!codigo || !password) {
-    message.textContent =
-      "Ingrese su código y contraseña";
+    message.textContent = "Ingrese su código y contraseña";
     return;
   }
 
   button.disabled = true;
   button.textContent = "Validando...";
 
+  console.log("Enviando solicitud a Power Automate");
+
   try {
-    const respuesta = await fetch(
-      CONFIG.LOGIN_FLOW_URL,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          codigo: codigo,
-          password: password
-        })
-      }
+    const respuesta = await fetch(CONFIG.LOGIN_FLOW_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        codigo: codigo,
+        password: password
+      })
+    });
+
+    console.log("Estado de respuesta:", respuesta.status);
+
+    const textoRespuesta = await respuesta.text();
+
+    console.log(
+      "Respuesta recibida de Power Automate:",
+      textoRespuesta
     );
 
-    const resultado = await respuesta.json();
+    let resultado;
+
+    try {
+      resultado = JSON.parse(textoRespuesta);
+    } catch {
+      throw new Error(
+        "Power Automate no devolvió un JSON válido"
+      );
+    }
 
     if (
       !respuesta.ok ||
-      resultado.autenticado !== true
+      resultado.autenticado !== true ||
+      !resultado.usuario
     ) {
       throw new Error(
         resultado.mensaje ||
@@ -69,15 +88,32 @@ form.addEventListener("submit", async event => {
       .trim()
       .toUpperCase();
 
+    const rolesPermitidos = [
+      "ADMINISTRADOR",
+      "DISTRIBUIDOR",
+      "COORDINADOR"
+    ];
+
+    if (!rolesPermitidos.includes(usuario.rol)) {
+      throw new Error(
+        "El usuario no tiene un rol válido"
+      );
+    }
+
     sessionStorage.setItem(
       CONFIG.USER_SESSION_KEY,
       JSON.stringify(usuario)
     );
 
-    window.location.href = "app.html";
+    console.log("Usuario autenticado:", usuario);
+
+    window.location.href = "./app.html";
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Error de inicio de sesión:",
+      error
+    );
 
     message.textContent =
       error.message ||
@@ -86,6 +122,5 @@ form.addEventListener("submit", async event => {
   } finally {
     button.disabled = false;
     button.textContent = "Ingresar";
-    passwordInput.value = "";
   }
 });
