@@ -1,0 +1,4 @@
+export const CONFIG = {
+  LOGIN_FLOW_URL: "PEGA_AQUI_LA_URL_DE_POWER_AUTOMATE",
+  USER_SESSION_KEY: "gp_usuario"
+};
