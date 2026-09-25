@@ -107,7 +107,7 @@ form.addEventListener("submit", async (event) => {
 
     console.log("Usuario autenticado:", usuario);
 
-    window.location.href = "./app.html";
+    window.location.href = "app.html";
 
   } catch (error) {
     console.error(
